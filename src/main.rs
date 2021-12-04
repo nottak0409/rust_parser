@@ -92,3 +92,35 @@ impl LexError {
 fn main() {
     println!("Hello, world!");
 }
+
+// 'pos'のバイトが期待するものであれば、1バイト消費して、'pos'を１進める
+fn consume_byte(input: &[u8], pos: usize, b: u8) -> Result<(u8, usize), LexError> {
+    if input.len() <= pos {
+        return Err(LexError::eof(Loc(pos, pos)));
+    }
+    //入力が期待するものでなければエラー
+    if input[pos] != b {
+        return Err(LexError::invalid_char(
+            input[pos] as char,
+            Loc(pos, pos + 1),
+        ));
+    }
+
+    Ok((b, pos + 1))
+}
+
+fn recognize_many(input: &[u8], mut pos: usize, mut f: impl FnMut(u8) -> bool) -> usize {
+    while pos < input.len() && f(input[pos]) {
+        pos += 1;
+    }
+    pos
+}
+
+fn lex_number(input: &[u8], pos: usize) -> Result<(Token, usize), LexError> {
+    use std::str::from_utf8;
+
+    let start = pos;
+    let end = recognize_many(input, start, |b| b"1234567890".contains(&b));
+    let n = from_utf8(&input[start..end]).unwrap().parse().unwrap();
+    Ok((Token::number(n, Loc(start, end)), end))
+}
