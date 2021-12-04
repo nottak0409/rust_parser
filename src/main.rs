@@ -208,3 +208,24 @@ fn test_lexer() {
         ])
     )
 }
+
+//　単行演算子を表すデータ型
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum UniOpKind {
+    //正号
+    Plus,
+    //負号
+    Minus,
+}
+
+type UniOp = Annot<UniOpKind>;
+
+impl UniOp {
+    fn plus(loc: Loc) -> Self {
+        Self::new(UniOpKind::Plus, loc)
+    }
+
+    fn minus(loc: Loc) -> Self {
+        Self::new(UniOpKind::Minus, loc)
+    }
+}
