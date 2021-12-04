@@ -229,3 +229,29 @@ impl UniOp {
         Self::new(UniOpKind::Minus, loc)
     }
 }
+
+//二項演算子を表すデータ型
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum BinOpKind {
+    Add,
+    Sub,
+    Mult,
+    Div,
+}
+
+type BinOp = Annot<BinOpKind>;
+
+impl BinOp {
+    fn add(loc: Loc) -> Self {
+        Self::new(BinOpKind::Add, loc)
+    }
+    fn sub(loc: Loc) -> Self {
+        Self::new(BinOpKind::Sub, loc)
+    }
+    fn mult(loc: Loc) -> Self {
+        Self::new(BinOpKind::Mult, loc)
+    }
+    fn div(loc: Loc) -> Self {
+        Self::new(BinOpKind::Div, loc)
+    }
+}
