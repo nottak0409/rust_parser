@@ -125,11 +125,11 @@ fn lex_number(input: &[u8], pos: usize) -> Result<(Token, usize), LexError> {
     Ok((Token::number(n, Loc(start, end)), end))
 }
 
-fn let_plus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+fn lex_plus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
     consume_byte(input, start, b'+').map(|(_, end)| (Token::plus(Loc(start, end)), end))
 }
 
-fn let_minus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+fn lex_minus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
     consume_byte(input, start, b'-').map(|(_, end)| (Token::minus(Loc(start, end)), end))
 }
 
@@ -152,4 +152,42 @@ fn lex_rparen(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
 fn skip_spaces(input: &[u8], pos: usize) -> Result<((), usize), LexError> {
     let pos = recognize_many(input, pos, |b| b" \n\t".contains(&b));
     Ok(((), pos))
+}
+
+//字句解析機
+fn lex(input: &str) -> Result<Vec<Token>, LexError> {
+    // 解析結果を保存するべくた
+    let mut tokens = Vec::new();
+    //入力
+    let input = input.as_bytes();
+    //位置の管理
+    let mut pos = 0;
+    //'pos'を更新するマクロ
+    macro_rules! lex_a_token {
+        ($lexer:expr) => {{
+            let (tok, p) = $lexer?;
+            tokens.push(tok);
+            pos = p;
+        }};
+    }
+    while pos < input.len() {
+        match input[pos] {
+            // 遷移図通りの実装
+            b'0'...b'9' => lex_a_token!(lex_number(input, pos)),
+            b'+' => lex_a_token!(lex_plus(input, pos)),
+            b'-' => lex_a_token!(lex_minus(input, pos)),
+            b'*' => lex_a_token!(lex_asterisk(input, pos)),
+            b'/' => lex_a_token!(lex_slash(input, pos)),
+            b'(' => lex_a_token!(lex_lparen(input, pos)),
+            b')' => lex_a_token!(lex_rparen(input, pos)),
+            // 空白を扱う
+            b' ' | b'\n' | b'\t' => {
+                let ((), p) = skip_spaces(input, pos)?;
+                pos = p;
+            }
+            // それ以外がくるとエラー
+            b => return Err(LexError::invalid_char(b as char, Loc(pos, pos + 1))),
+        }
+    }
+    Ok(tokens)
 }
