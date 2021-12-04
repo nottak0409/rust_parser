@@ -124,3 +124,32 @@ fn lex_number(input: &[u8], pos: usize) -> Result<(Token, usize), LexError> {
     let n = from_utf8(&input[start..end]).unwrap().parse().unwrap();
     Ok((Token::number(n, Loc(start, end)), end))
 }
+
+fn let_plus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'+').map(|(_, end)| (Token::plus(Loc(start, end)), end))
+}
+
+fn let_minus(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'-').map(|(_, end)| (Token::minus(Loc(start, end)), end))
+}
+
+fn lex_asterisk(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'*').map(|(_, end)| (Token::asterisk(Loc(start, end)), end))
+}
+
+fn lex_slash(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'/').map(|(_, end)| (Token::slash(Loc(start, end)), end))
+}
+
+fn lex_lparen(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b'(').map(|(_, end)| (Token::lparen(Loc(start, end)), end))
+}
+
+fn lex_rparen(input: &[u8], start: usize) -> Result<(Token, usize), LexError> {
+    consume_byte(input, start, b')').map(|(_, end)| (Token::rparen(Loc(start, end)), end))
+}
+
+fn skip_spaces(input: &[u8], pos: usize) -> Result<((), usize), LexError> {
+    let pos = recognize_many(input, pos, |b| b" \n\t".contains(&b));
+    Ok(((), pos))
+}
