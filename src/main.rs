@@ -89,10 +89,6 @@ impl LexError {
         LexError::new(LexErrorKind::Eof, loc)
     }
 }
-fn main() {
-    println!("Hello, world!");
-}
-
 // 'pos'のバイトが期待するものであれば、1バイト消費して、'pos'を１進める
 fn consume_byte(input: &[u8], pos: usize, b: u8) -> Result<(u8, usize), LexError> {
     if input.len() <= pos {
@@ -253,5 +249,37 @@ impl BinOp {
     }
     fn div(loc: Loc) -> Self {
         Self::new(BinOpKind::Div, loc)
+    }
+}
+
+use std::io;
+
+// プロンプトを表示し、ユーザーの入力を促す
+fn prompt(s: &str) -> io::Result<()> {
+    use std::io::{stdout, Write};
+    let stdout = stdout();
+    let mut stdout = stdout.lock();
+    stdout.write(s.as_bytes())?;
+    stdout.flush()
+}
+
+fn main() {
+    use std::io::{stdin, BufRead, BufReader};
+
+    let stdin = stdin();
+    let stdin = stdin.lock();
+    let stdin = BufReader::new(stdin);
+    let mut lines = stdin.lines();
+
+    loop {
+        prompt("> ").unwrap();
+        //ユーザーの入力取得
+        if let Some(Ok(line)) = lines.next() {
+            // 字句解析
+            let token = lex(&line);
+            println!("{:?}", token);
+        } else {
+            break;
+        }
     }
 }
