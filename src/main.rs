@@ -252,6 +252,18 @@ impl BinOp {
     }
 }
 
+//ASTを表すデータ型
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum AstKind {
+    //数値
+    Num(u64),
+    //単行演算子
+    UniOp { op: UniOp, e: Box<Ast> },
+    //にこう演算子
+    BinOp { op: BinOp, l: Box<Ast>, r: Box<Ast> },
+}
+
+type Ast = Annot<AstKind>;
 use std::io;
 
 // プロンプトを表示し、ユーザーの入力を促す
